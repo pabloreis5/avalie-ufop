@@ -1,6 +1,6 @@
-# **CSI606-2025-01 - Remoto - Proposta de Trabalho Final**
+# **CSI606-2025-01 - Proposta de Trabalho Final**
 
-## *Discente: [Seu Nome Completo]*
+## *Discente: Pablo Reis*
 
 ---
 
@@ -79,11 +79,9 @@ Protótipos de baixa fidelidade para as principais páginas do sistema foram ela
 - **Dashboard administrativo**: Painel com gráficos e estatísticas consolidadas
 - **Página de relatórios**: Visualização detalhada por disciplina/professor
 
-Os protótipos podem ser encontrados no diretório `/prototipos` deste repositório, disponível em: [Link para pasta de protótipos no GitHub]
+Os protótipos podem ser encontrados no diretório `/prototipos` deste repositório.
 
 **Ferramentas utilizadas**: Figma / Canva / Desenhos à mão digitalizados
-
-*(Observação: Após criar os protótipos, atualize este link com o caminho correto)*
 
 ---
 
