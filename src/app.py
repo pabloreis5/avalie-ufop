@@ -147,14 +147,29 @@ def avaliar():
         professores=professores
     )
 
-@app.route("/avaliacoes")
-def avaliacoes():
+@app.route("/ranking")
+def ranking():
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM avaliacao")
-    dados = cursor.fetchall()
+
+    cursor.execute("""
+        SELECT
+            d.nome AS disciplina,
+            p.nome AS professor,
+            ROUND(AVG(a.nota), 2) AS media,
+            COUNT(a.id) AS total
+        FROM avaliacao a
+        JOIN disciplina d ON d.id = a.disciplina_id
+        JOIN professor p ON p.id = a.professor_id
+        GROUP BY d.id, p.id
+        ORDER BY media DESC
+    """)
+
+    ranking = cursor.fetchall()
     conn.close()
-    return str([dict(a) for a in dados])
+
+    return render_template("ranking.html", ranking=ranking)
+
 
 if __name__ == "__main__":
     init_db()
