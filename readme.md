@@ -1,91 +1,99 @@
-# **CSI606-2025-01 - Proposta de Trabalho Final**
+# **CSI606-2025-01 – Proposta de Trabalho Final**
 
 ## *Discente: Pablo Reis*
 
 ---
 
-### Resumo
+## Resumo
 
-Este trabalho propõe o desenvolvimento de um Sistema de Avaliação de Disciplinas que permite aos alunos avaliarem de forma anônima as disciplinas cursadas e seus respectivos professores. O sistema visa criar um canal seguro e transparente de feedback acadêmico, possibilitando que os estudantes expressem suas opiniões sem receio de exposição, enquanto oferece aos docentes e coordenadores acesso a dados consolidados para aprimoramento contínuo do processo de ensino. A aplicação garantirá o anonimato completo das respostas, utilizará um banco de dados relacional para armazenamento seguro das informações e disponibilizará painéis administrativos com relatórios e estatísticas visuais sobre a satisfação dos alunos.
-
----
-
-### 1. Tema
-
-O trabalho final tem como tema o desenvolvimento de um **Sistema Web de Avaliação Anônima de Disciplinas e Professores**, com foco na coleta estruturada de feedback acadêmico e na geração de relatórios estatísticos para apoio à gestão pedagógica institucional.
+Este trabalho propõe o desenvolvimento de um **Sistema Web de Avaliação de Disciplinas**, cujo objetivo é permitir que alunos avaliem, de forma **anônima**, as disciplinas cursadas e os professores que as ministraram. A aplicação busca fornecer um canal simples e acessível de feedback acadêmico, possibilitando a coleta estruturada de avaliações quantitativas e comentários opcionais, sem qualquer identificação do avaliador. Os dados coletados serão armazenados em banco de dados relacional e utilizados para o cálculo de médias e geração de **rankings de melhores e piores disciplinas**, oferecendo subsídios para análise da satisfação discente e apoio à gestão pedagógica.
 
 ---
 
-### 2. Escopo
+## 1. Tema
 
-Este projeto terá as seguintes funcionalidades:
-
-#### 2.1 Módulo de Cadastro e Gestão
-- Cadastro de disciplinas com informações básicas (código, nome, carga horária, ementa)
-- Cadastro de professores (nome, departamento, titulação)
-- Cadastro de turmas vinculando disciplina, professor, semestre e código único de acesso
-- Gerenciamento completo (CRUD) de todas as entidades do sistema
-
-#### 2.2 Módulo de Avaliação pelos Alunos
-- Acesso anônimo às avaliações através de código único da turma
-- Formulário de avaliação com:
-  - Perguntas objetivas utilizando escala de 1 a 5 (sobre conteúdo, didática, materiais, atendimento, infraestrutura)
-  - Campo opcional para comentários e sugestões em texto livre
-- Garantia de anonimato total (sistema não armazena identificação do avaliador)
-- Interface intuitiva e responsiva para preenchimento
-
-#### 2.3 Módulo Administrativo
-- Painel de controle para coordenadores e gestores acadêmicos
-- Visualização de relatórios consolidados por:
-  - Disciplina
-  - Professor
-  - Semestre letivo
-  - Departamento
-- Exibição de médias gerais e por critério de avaliação
-- Gráficos estatísticos de satisfação (barras, pizza, linhas de tendência)
-- Listagem de comentários textuais agregados por turma
-
-#### 2.4 Funcionalidades Técnicas
-- Armazenamento seguro em banco de dados relacional (PostgreSQL ou SQLite)
-- Interface web responsiva compatível com dispositivos móveis
-- Validação de dados no front-end e back-end
-- Geração dinâmica de relatórios e gráficos
+O trabalho final tem como tema o desenvolvimento de um **Sistema Web de Avaliação Anônima de Disciplinas e Professores**, com foco na coleta de feedback acadêmico por meio de formulários estruturados e na apresentação de resultados agregados, como médias e rankings de desempenho das disciplinas avaliadas.
 
 ---
 
-### 3. Restrições
+## 2. Escopo
+
+Este projeto contemplará as seguintes funcionalidades:
+
+### 2.1 Estrutura Acadêmica
+
+- Cadastro de cursos (ex.: Engenharia Elétrica, Engenharia de Computação, Engenharia de Produção e Sistemas de Informação)
+- Cadastro de disciplinas vinculadas a um curso específico
+- Cadastro de professores disponíveis para avaliação
+- Organização lógica das disciplinas por curso, permitindo filtragem durante o processo de avaliação
+
+---
+
+### 2.2 Módulo de Avaliação pelos Alunos
+
+- Página inicial genérica de boas-vindas com acesso ao formulário de avaliação
+- Formulário de avaliação anônima contendo:
+  - Seleção do curso
+  - Seleção da disciplina (filtrada de acordo com o curso escolhido)
+  - Seleção do professor (lista geral de docentes)
+  - Atribuição de nota em escala numérica de **0 a 5**
+  - Campo opcional para comentários textuais
+- Garantia de anonimato total, sem armazenamento de dados que identifiquem o aluno
+- Interface simples e intuitiva para preenchimento das avaliações
+
+---
+
+### 2.3 Módulo de Visualização de Resultados
+
+- Armazenamento das avaliações em banco de dados relacional
+- Cálculo automático das médias das notas por disciplina
+- Exibição de um **ranking de disciplinas**, ordenado da melhor para a pior avaliação
+- Possibilidade de visualização agregada por curso e disciplina
+- Apresentação dos resultados de forma clara, por meio de tabelas e estatísticas simples
+
+---
+
+### 2.4 Funcionalidades Técnicas
+
+- Persistência de dados em banco de dados relacional (SQLite ou PostgreSQL)
+- Aplicação web desenvolvida em arquitetura cliente-servidor
+- Validação básica de dados no envio das avaliações
+- Estrutura simples, priorizando funcionalidade e clareza de implementação
+
+---
+
+## 3. Restrições
 
 Neste trabalho **não serão considerados**:
 
-- Sistema de autenticação institucional integrada (login via LDAP, AD ou SSO)
-- Controle de períodos ou janelas temporais para abertura/fechamento de avaliações
-- Notificações automáticas por e-mail ou SMS aos alunos
-- Sistema de permissões granulares com múltiplos níveis de acesso
-- Exportação de relatórios em PDF ou outros formatos para download
-- Análise avançada de sentimento utilizando processamento de linguagem natural (NLP)
-- Módulo de comparação entre departamentos ou cursos distintos
-- Histórico de evolução temporal das avaliações ao longo de múltiplos semestres
-- Integração com sistemas acadêmicos externos (SIA, SIGA, etc.)
-- Funcionalidade de resposta ou contestação por parte dos professores avaliados
+- Qualquer forma de autenticação ou identificação de alunos
+- Controle de período ou janela temporal para realização das avaliações
+- Associação histórica de professores a disciplinas por semestre letivo
+- Sistema de permissões ou perfis de usuário (administrador, professor, aluno)
+- Exportação de relatórios em PDF ou outros formatos
+- Dashboards interativos avançados
+- Análise de sentimento ou processamento de linguagem natural nos comentários
+- Comparação entre cursos distintos ou análise evolutiva ao longo do tempo
+- Integração com sistemas acadêmicos institucionais
+- Funcionalidade de resposta ou contestação das avaliações por professores
 
 ---
 
-### 4. Protótipo
+## 4. Protótipo
 
-Protótipos de baixa fidelidade para as principais páginas do sistema foram elaborados, incluindo:
+Protótipos de baixa fidelidade foram elaborados para representar as principais telas do sistema, incluindo:
 
-- **Página inicial**: Entrada do código da turma para acesso anônimo
-- **Formulário de avaliação**: Interface de preenchimento das questões objetivas e comentários
-- **Dashboard administrativo**: Painel com gráficos e estatísticas consolidadas
-- **Página de relatórios**: Visualização detalhada por disciplina/professor
+- **Página inicial**: Tela de boas-vindas com acesso ao formulário de avaliação
+- **Formulário de avaliação**: Seleção de curso, disciplina, professor e preenchimento da nota e comentário
+- **Página de ranking**: Exibição das disciplinas ordenadas por média de avaliação
 
-Os protótipos podem ser encontrados no diretório `/prototipos` deste repositório.
+Os protótipos encontram-se no diretório `/prototipos` deste repositório.
 
-**Ferramentas utilizadas**: Figma / Canva / Desenhos à mão digitalizados
+**Ferramentas utilizadas**: Figma, Canva ou desenhos digitais simples.
 
 ---
 
-### 5. Referências
+## 5. Referências
 
 SOMMERVILLE, Ian. **Engenharia de Software**. 10. ed. São Paulo: Pearson Education do Brasil, 2018.
 
@@ -95,36 +103,7 @@ SILBERSCHATZ, Abraham; KORTH, Henry F.; SUDARSHAN, S. **Sistema de Banco de Dado
 
 FLASK. **Flask Documentation**. Disponível em: https://flask.palletsprojects.com/. Acesso em: 18 nov. 2025.
 
-REACT. **React Documentation**. Disponível em: https://react.dev/. Acesso em: 18 nov. 2025.
-
-POSTGRESQL. **PostgreSQL: The World's Most Advanced Open Source Relational Database**. Disponível em: https://www.postgresql.org/. Acesso em: 18 nov. 2025.
-
 ---
 
 ## Estrutura do Repositório
 
-```
-/
-├── README.md                 # Este arquivo
-├── /prototipos              # Protótipos de interface
-├── /docs                    # Documentação adicional
-├── /src                     # Código-fonte da aplicação
-│   ├── /backend            # Código do servidor
-│   ├── /frontend           # Código da interface
-│   └── /database           # Scripts SQL e migrações
-└── /tests                   # Testes automatizados
-```
-
----
-
-## Tecnologias Previstas
-
-- **Back-end**: Python com Flask ou FastAPI
-- **Banco de Dados**: PostgreSQL (produção) / SQLite (desenvolvimento)
-- **Front-end**: React ou HTML/CSS/JavaScript
-- **Gráficos**: Chart.js ou Recharts
-- **Versionamento**: Git e GitHub
-
----
-
-**Observação**: Este documento será atualizado conforme o desenvolvimento do projeto avança.
