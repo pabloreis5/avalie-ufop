@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Avaliação</title>
+</head>
+<body>
+    <h2>Avalie a disciplina</h2>
+
+    <form method="post">
+        <label>Curso:</label><br>
+        <select name="curso_id" required>
+            <option value="">Selecione</option>
+            {% for curso in cursos %}
+                <option value="{{ curso.id }}">{{ curso.nome }}</option>
+            {% endfor %}
+        </select><br><br>
+
+        <label>Disciplina:</label><br>
+        <select name="disciplina_id" required>
+            <option value="">Selecione</option>
+            {% for d in disciplinas %}
+                <option value="{{ d.id }}">{{ d.nome }}</option>
+            {% endfor %}
+        </select><br><br>
+
+        <label>Professor:</label><br>
+        <select name="professor_id" required>
+            <option value="">Selecione</option>
+            {% for p in professores %}
+                <option value="{{ p.id }}">{{ p.nome }}</option>
+            {% endfor %}
+        </select><br><br>
+
+        <label>Nota (0 a 5):</label><br>
+        <input type="number" name="nota" min="0" max="5" required><br><br>
+
+        <label>Comentário (opcional):</label><br>
+        <textarea name="comentario"></textarea><br><br>
+
+        <button type="submit">Enviar avaliação</button>
+    </form>
+</body>
+</html>
