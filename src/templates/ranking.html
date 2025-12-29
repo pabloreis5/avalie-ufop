@@ -1,34 +1,39 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <title>Ranking de Disciplinas</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
 </head>
+
 <body>
     <h2>Ranking de Disciplinas</h2>
 
     <table border="1" cellpadding="5">
-    <tr>
-        <th>Posição</th>
-        <th>Disciplina</th>
-        <th>Professor</th>
-        <th>Média</th>
-        <th>Total de Avaliações</th>
-    </tr>
+        <tr>
+            <th>Posição</th>
+            <th>Disciplina</th>
+            <th>Professor</th>
+            <th>Média</th>
+            <th>Total de Avaliações</th>
+        </tr>
 
-    {% for item in ranking %}
-    <tr>
-        <td>{{ loop.index }}</td>
-        <td>{{ item.disciplina }}</td>
-        <td>{{ item.professor }}</td>
-        <td>{{ item.media }}</td>
-        <td>{{ item.total }}</td>
-    </tr>
-    {% endfor %}
-</table>
+        {% for item in ranking %}
+        <tr>
+            <td>{{ loop.index }}</td>
+            <td>{{ item.disciplina }}</td>
+            <td>{{ item.professor }}</td>
+            <td>{{ item.media }}</td>
+            <td>{{ item.total }}</td>
+        </tr>
+        {% endfor %}
+    </table>
 
 
     <br>
     <a href="{{ url_for('index') }}">Voltar</a>
 </body>
+
 </html>
