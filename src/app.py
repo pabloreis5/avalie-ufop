@@ -6,6 +6,49 @@ from flask import Flask, render_template, request, redirect, url_for
 app = Flask(__name__)
 DATABASE = "app.db"
 
+DISCIPLINAS_SI = [
+    ("CEA059", "Fundamentos de Geometria Analítica e Álgebra Linear"),
+    ("CEA060", "Fundamentos de Cálculo"),
+    ("CSI101", "Programação de Computadores I"),
+    ("CSI601", "Fundamentos de Sistema de Informação"),
+    ("CSI901", "Informática e Sociedade"),
+    ("CSI902", "Metodologia de Pesquisa"),
+    ("CSI011", "Matemática Discreta"),
+    ("CSI102", "Programação de Computadores II"),
+    ("CSI103", "Algoritmos e Estruturas de Dados I"),
+    ("CSI807", "Gestão da Informação"),
+    ("ENP144", "Teoria Geral da Administração"),
+    ("CEA055", "Estatística e Probabilidade"),
+    ("CSI104", "Algoritmos e Estruturas de Dados II"),
+    ("CSI115", "Algoritmos e Estruturas de Dados III"),
+    ("CSI211", "Fundamentos de Organização e Arquitetura de Computadores"),
+    ("ENP473", "Comportamento Organizacional"),
+    ("CSI204", "Sistemas Operacionais"),
+    ("CSI412", "Engenharia de Software I"),
+    ("CSI602", "Banco de Dados I"),
+    ("ENP012", "Programação Linear e Inteira"),
+    ("ENP150", "Economia"),
+    ("CSI106", "Fundamentos Teóricos da Computação"),
+    ("CSI301", "Redes de Computadores I"),
+    ("CSI410", "Engenharia de Software II"),
+    ("CSI522", "Interação Humano-Computador"),
+    ("CSI701", "Inteligência Artificial"),
+    ("CSI990", "Projeto Integrador I"),
+    ("CSI114", "Linguagens de Programação"),
+    ("CSI302", "Sistemas Distribuídos"),
+    ("CSI405", "Gerência de Projetos de Software"),
+    ("CSI606", "Sistemas Web I"),
+    ("CSI991", "Projeto Integrador II"),
+    ("CSI808", "Gestão da Tecnologia da Informação"),
+    ("CSI992", "Trabalho de Conclusão de Curso I"),
+    ("ENP026", "Administração de Recursos Humanos"),
+    ("ENP493", "Empreendedorismo"),
+    ("CSI307", "Segurança e Auditoria de Sistemas"),
+    ("CSI605", "Sistemas de Apoio à Decisão"),
+    ("CSI997", "Trabalho de Conclusão de Curso II"),
+]
+
+
 def get_db():
     conn = sqlite3.connect(DATABASE)
     conn.row_factory = sqlite3.Row
@@ -81,22 +124,28 @@ def seed_data():
             (prof,)
         )
 
-    disciplinas = [
-        ("Cálculo I", 1),
-        ("Física I", 1),
-        ("Algoritmos", 2),
-        ("Estruturas de Dados", 2),
-        ("Gestão da Produção", 3),
-        ("Pesquisa Operacional", 3),
-        ("Banco de Dados", 4),
-        ("Engenharia de Software", 4),
-    ]
+    # Pega o id do curso "Sistemas de Informação" sem assumir número fixo
+    cursor.execute("SELECT id FROM curso WHERE nome = ?", ("Sistemas de Informação",))
+    row = cursor.fetchone()
+    if not row:
+        raise RuntimeError("Curso 'Sistemas de Informação' não encontrado no seed.")
+    si_id = row["id"]
 
-    for nome, curso_id in disciplinas:
+    # Insere todas as disciplinas de SI (sem duplicar)
+    for codigo, nome in DISCIPLINAS_SI:
+        nome_completo = f"{codigo} - {nome}"
+
         cursor.execute(
-            "INSERT OR IGNORE INTO disciplina (nome, curso_id) VALUES (?, ?)",
-            (nome, curso_id)
+            "SELECT 1 FROM disciplina WHERE nome = ? AND curso_id = ?",
+            (nome_completo, si_id)
         )
+        exists = cursor.fetchone()
+
+        if not exists:
+            cursor.execute(
+                "INSERT INTO disciplina (nome, curso_id) VALUES (?, ?)",
+                (nome_completo, si_id)
+            )
 
     conn.commit()
     conn.close()
@@ -112,27 +161,46 @@ def avaliar():
     cursor = conn.cursor()
 
     if request.method == "POST":
-        curso_id = request.form["curso_id"]
-        disciplina_id = request.form["disciplina_id"]
-        professor_id = request.form["professor_id"]
-        nota = request.form["nota"]
-        comentario = request.form["comentario"]
+        print("DEBUG form:", dict(request.form))
+
+        curso_id = request.form.get("curso_id", "").strip()
+        disciplina_id = request.form.get("disciplina_id", "").strip()
+        professor_id = request.form.get("professor_id", "").strip()
+        nota = request.form.get("nota", "").strip()
+        comentario = request.form.get("comentario", "").strip() or None
+
+        # Validação obrigatória (não depende do JS)
+        if not (curso_id and disciplina_id and professor_id and nota):
+            conn.close()
+            # Simples: volta para a página (pode melhorar com flash depois)
+            return redirect(url_for("avaliar"))
+
+        try:
+            nota_int = int(nota)
+        except ValueError:
+            conn.close()
+            return redirect(url_for("avaliar"))
+
+        if nota_int < 0 or nota_int > 5:
+            conn.close()
+            return redirect(url_for("avaliar"))
 
         cursor.execute("""
             INSERT INTO avaliacao
             (curso_id, disciplina_id, professor_id, nota, comentario)
             VALUES (?, ?, ?, ?, ?)
-        """, (curso_id, disciplina_id, professor_id, nota, comentario))
+        """, (curso_id, disciplina_id, professor_id, nota_int, comentario or None))
 
         conn.commit()
         conn.close()
 
         return redirect(url_for("index"))
 
+
     cursor.execute("SELECT * FROM curso")
     cursos = cursor.fetchall()
 
-    cursor.execute("SELECT * FROM disciplina")
+    cursor.execute("SELECT id, nome, curso_id FROM disciplina ORDER BY nome")
     disciplinas = cursor.fetchall()
 
     cursor.execute("SELECT * FROM professor")
@@ -155,14 +223,22 @@ def ranking():
     cursor.execute("""
         SELECT
             d.nome AS disciplina,
+            CASE c.nome
+                WHEN 'Sistemas de Informação' THEN 'SI'
+                WHEN 'Engenharia Elétrica' THEN 'E.E'
+                WHEN 'Engenharia de Computação' THEN 'E.C'
+                WHEN 'Engenharia de Produção' THEN 'E.P'
+                ELSE c.nome
+            END AS curso,
             p.nome AS professor,
             ROUND(AVG(a.nota), 2) AS media,
-            COUNT(a.id) AS total
+            COUNT(a.id) AS total_avaliacoes
         FROM avaliacao a
         JOIN disciplina d ON d.id = a.disciplina_id
+        JOIN curso c ON c.id = d.curso_id
         JOIN professor p ON p.id = a.professor_id
         GROUP BY d.id, p.id
-        ORDER BY media DESC
+        ORDER BY media DESC, total_avaliacoes DESC
     """)
 
     ranking = cursor.fetchall()
@@ -173,5 +249,18 @@ def ranking():
 
 if __name__ == "__main__":
     init_db()
-    seed_data()
+
+    # Só roda seed se estiver vazio
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("SELECT COUNT(*) FROM curso")
+    empty = (cur.fetchone()[0] == 0)
+    conn.close()
+
+    if empty:
+        seed_data()
+
     app.run(debug=True)
+
+
+
