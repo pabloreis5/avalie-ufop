@@ -1,45 +1,139 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <title>Avaliação</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Avalie disciplinas e professores da UFOP de forma anônima.">
+  <title>Avaliar - Avalie UFOP</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
 </head>
 <body>
-    <h2>Avalie a disciplina</h2>
+  <header>
+    <div class="header-content">
+      <a href="/" class="logo">
+        <div class="logo-icon">📚</div>
+        <div class="logo-text">Avalie<span>UFOP</span></div>
+      </a>
+      <nav>
+        <a href="/">Home</a>
+        <a href="/avaliar">Avaliar</a>
+        <a href="/ranking">Ranking</a>
+      </nav>
+    </div>
+  </header>
 
-    <form method="post">
-        <label>Curso:</label><br>
-        <select name="curso_id" required>
-            <option value="">Selecione</option>
+  <main>
+    <div class="page-header">
+      <h1>Avaliar Disciplina</h1>
+      <p>Compartilhe sua experiência de forma anônima</p>
+    </div>
+
+    <!-- Flash messages do Flask -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-messages">
+          {% for category, message in messages %}
+            <div class="flash {{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <div class="form-container">
+      <form id="avaliar-form" method="POST" action="/avaliar">
+        
+        <!-- Curso -->
+        <div class="form-group">
+          <label for="curso_id">
+            Curso <span class="required">*</span>
+          </label>
+          <select id="curso_id" name="curso_id">
+            <option value="">Selecione o curso...</option>
             {% for curso in cursos %}
-                <option value="{{ curso.id }}">{{ curso.nome }}</option>
+              <option value="{{ curso.id }}">{{ curso.nome }}</option>
             {% endfor %}
-        </select><br><br>
+          </select>
+          <div id="curso-error" class="error-message">Por favor, selecione um curso.</div>
+        </div>
 
-        <label>Disciplina:</label><br>
-        <select name="disciplina_id" required>
-            <option value="">Selecione</option>
-            {% for d in disciplinas %}
-                <option value="{{ d.id }}">{{ d.nome }}</option>
+        <!-- Disciplina -->
+        <div class="form-group">
+          <label for="disciplina_id">
+            Disciplina <span class="required">*</span>
+          </label>
+          <select id="disciplina_id" name="disciplina_id">
+            <option value="">Selecione a disciplina...</option>
+            {% for disciplina in disciplinas %}
+              <option value="{{ disciplina.id }}">{{ disciplina.nome }}</option>
             {% endfor %}
-        </select><br><br>
+          </select>
+          <div id="disciplina-error" class="error-message">Por favor, selecione uma disciplina.</div>
+        </div>
 
-        <label>Professor:</label><br>
-        <select name="professor_id" required>
-            <option value="">Selecione</option>
-            {% for p in professores %}
-                <option value="{{ p.id }}">{{ p.nome }}</option>
+        <!-- Professor -->
+        <div class="form-group">
+          <label for="professor_id">
+            Professor(a) <span class="required">*</span>
+          </label>
+          <select id="professor_id" name="professor_id">
+            <option value="">Selecione o professor(a)...</option>
+            {% for professor in professores %}
+              <option value="{{ professor.id }}">{{ professor.nome }}</option>
             {% endfor %}
-        </select><br><br>
+          </select>
+          <div id="professor-error" class="error-message">Por favor, selecione um professor.</div>
+        </div>
 
-        <label>Nota (0 a 5):</label><br>
-        <input type="number" name="nota" min="0" max="5" required><br><br>
+        <!-- Nota (Estrelas) -->
+        <div class="form-group">
+          <label>
+            Nota <span class="required">*</span>
+          </label>
+          <div class="rating-container">
+            <div class="star-rating">
+              <input type="radio" id="star5" name="nota" value="5">
+              <label for="star5" title="5 - Excelente">★</label>
+              <input type="radio" id="star4" name="nota" value="4">
+              <label for="star4" title="4 - Muito Bom">★</label>
+              <input type="radio" id="star3" name="nota" value="3">
+              <label for="star3" title="3 - Bom">★</label>
+              <input type="radio" id="star2" name="nota" value="2">
+              <label for="star2" title="2 - Regular">★</label>
+              <input type="radio" id="star1" name="nota" value="1">
+              <label for="star1" title="1 - Ruim">★</label>
+              <input type="radio" id="star0" name="nota" value="0">
+              <label for="star0" title="0 - Péssimo">★</label>
+            </div>
+            <span id="rating-value" class="rating-value">Selecione uma nota de 0 a 5</span>
+          </div>
+          <div id="nota-error" class="error-message">Por favor, selecione uma nota.</div>
+        </div>
 
-        <label>Comentário (opcional):</label><br>
-        <textarea name="comentario"></textarea><br><br>
+        <!-- Comentário -->
+        <div class="form-group">
+          <label for="comentario">
+            Comentário <span style="color: var(--text-muted); font-weight: normal;">(opcional)</span>
+          </label>
+          <textarea 
+            id="comentario" 
+            name="comentario" 
+            placeholder="Compartilhe mais detalhes sobre sua experiência..."
+            maxlength="500"
+          ></textarea>
+        </div>
 
-        <button type="submit">Enviar avaliação</button>
-    </form>
+        <button type="submit" class="btn btn-submit">
+          Enviar Avaliação
+        </button>
+      </form>
+    </div>
+  </main>
+
+  <footer>
+    <p>© 2024 Avalie UFOP — Feito por estudantes, para estudantes.</p>
+  </footer>
+
+  <script src="/static/app.js"></script>
 </body>
 </html>

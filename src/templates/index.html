@@ -1,24 +1,68 @@
 <!DOCTYPE html>
-<html lang="pt-br">
-
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <title>Sistema de Avaliação</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Avalie UFOP - Sistema de avaliação de disciplinas e professores da UFOP. Compartilhe sua experiência de forma anônima.">
+  <title>Avalie UFOP - Avaliação de Disciplinas</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
 </head>
-
 <body>
-    <h1>Bem-vindo ao Sistema de Avaliação de Disciplinas</h1>
-    <a href="{{ url_for('avaliar') }}">
-        <button>Avaliar agora</button>
-    </a>
+  <header>
+    <div class="header-content">
+      <a href="/" class="logo">
+        <div class="logo-icon">📚</div>
+        <div class="logo-text">Avalie<span>UFOP</span></div>
+      </a>
+      <nav>
+        <a href="/">Home</a>
+        <a href="/avaliar">Avaliar</a>
+        <a href="/ranking">Ranking</a>
+      </nav>
+    </div>
+  </header>
 
-    <br><br>
+  <main>
+    <section class="hero">
+      <h1>Avalie sua experiência na <span>UFOP</span></h1>
+      <p>
+        Compartilhe de forma anônima suas avaliações sobre disciplinas e professores. 
+        Sua opinião ajuda outros estudantes a fazerem melhores escolhas acadêmicas.
+      </p>
+      <div class="hero-buttons">
+        <a href="/avaliar" class="btn btn-primary">
+          ⭐ Avaliar Agora
+        </a>
+        <a href="/ranking" class="btn btn-secondary">
+          📊 Ver Ranking
+        </a>
+      </div>
+    </section>
 
-    <a href="{{ url_for('ranking') }}">
-        <button>Ver ranking</button>
-    </a>
+    <section class="features">
+      <div class="feature-card">
+        <div class="feature-icon">🔒</div>
+        <h3>100% Anônimo</h3>
+        <p>Suas avaliações são completamente anônimas. Nenhum dado pessoal é coletado ou armazenado.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">⭐</div>
+        <h3>Avaliação Simples</h3>
+        <p>Sistema de notas de 0 a 5 estrelas, com espaço para comentários opcionais.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📈</div>
+        <h3>Ranking Atualizado</h3>
+        <p>Veja as disciplinas mais bem avaliadas e encontre as melhores opções para sua grade.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>© 2024 Avalie UFOP — Feito por estudantes, para estudantes.</p>
+  </footer>
+
+  <script src="/static/app.js"></script>
 </body>
-
 </html>

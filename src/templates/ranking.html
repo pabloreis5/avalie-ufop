@@ -1,39 +1,99 @@
 <!DOCTYPE html>
-<html lang="pt-br">
-
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <title>Ranking de Disciplinas</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Ranking das disciplinas mais bem avaliadas da UFOP.">
+  <title>Ranking - Avalie UFOP</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
 </head>
-
 <body>
-    <h2>Ranking de Disciplinas</h2>
+  <header>
+    <div class="header-content">
+      <a href="/" class="logo">
+        <div class="logo-icon">📚</div>
+        <div class="logo-text">Avalie<span>UFOP</span></div>
+      </a>
+      <nav>
+        <a href="/">Home</a>
+        <a href="/avaliar">Avaliar</a>
+        <a href="/ranking">Ranking</a>
+      </nav>
+    </div>
+  </header>
 
-    <table border="1" cellpadding="5">
-        <tr>
-            <th>Posição</th>
-            <th>Disciplina</th>
-            <th>Professor</th>
-            <th>Média</th>
-            <th>Total de Avaliações</th>
-        </tr>
+  <main>
+    <div class="page-header">
+      <h1>Ranking de Disciplinas</h1>
+      <p>As disciplinas mais bem avaliadas pelos estudantes</p>
+    </div>
 
-        {% for item in ranking %}
-        <tr>
-            <td>{{ loop.index }}</td>
-            <td>{{ item.disciplina }}</td>
-            <td>{{ item.professor }}</td>
-            <td>{{ item.media }}</td>
-            <td>{{ item.total }}</td>
-        </tr>
-        {% endfor %}
-    </table>
+    {% if ranking and ranking|length > 0 %}
+      <div class="ranking-container">
+        <div class="ranking-header">
+          <h2>📊 {{ ranking|length }} disciplinas avaliadas</h2>
+          <div class="search-box">
+            <input 
+              type="text" 
+              id="ranking-search" 
+              placeholder="Buscar disciplina..."
+              autocomplete="off"
+            >
+          </div>
+        </div>
 
+        <table id="ranking-table" class="ranking-table">
+          <thead>
+            <tr>
+              <th style="width: 80px;">#</th>
+              <th>Disciplina</th>
+              <th>Curso</th>
+              <th style="width: 120px;">Média</th>
+              <th style="width: 120px;">Avaliações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in ranking %}
+              <tr>
+                <td>
+                  <span class="ranking-position {% if loop.index == 1 %}top-1{% elif loop.index == 2 %}top-2{% elif loop.index == 3 %}top-3{% endif %}">
+                    {{ loop.index }}
+                  </span>
+                </td>
+                <td><strong>{{ item.disciplina }}</strong></td>
+                <td>{{ item.curso if item.curso else '-' }}</td>
+                <td>
+                  <span class="media-badge {% if item.media >= 4 %}excellent{% elif item.media >= 3 %}good{% else %}average{% endif %}">
+                    ★ {{ "%.1f"|format(item.media) }}
+                  </span>
+                </td>
+                <td>{{ item.total_avaliacoes if item.total_avaliacoes else '-' }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
 
-    <br>
-    <a href="{{ url_for('index') }}">Voltar</a>
+        <div id="no-results" class="no-results">
+          <p>Nenhuma disciplina encontrada com esse termo.</p>
+        </div>
+      </div>
+    {% else %}
+      <div class="ranking-container">
+        <div class="empty-state">
+          <p>📭 Ainda não há avaliações registradas.</p>
+          <p style="margin-top: 1rem;">
+            <a href="/avaliar" class="btn btn-primary">Seja o primeiro a avaliar!</a>
+          </p>
+        </div>
+      </div>
+    {% endif %}
+  </main>
+
+  <footer>
+    <p>© 2024 Avalie UFOP — Feito por estudantes, para estudantes.</p>
+  </footer>
+
+  <script src="/static/app.js"></script>
 </body>
-
 </html>
