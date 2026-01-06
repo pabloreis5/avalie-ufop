@@ -81,7 +81,7 @@ Neste trabalho **não serão considerados**:
 
 ## 4. Protótipo
 
-Protótipos de baixa fidelidade foram elaborados para representar as principais telas do sistema, incluindo:
+Protótipos foram elaborados para representar as principais telas do sistema, incluindo:
 
 - **Página inicial**: Tela de boas-vindas com acesso ao formulário de avaliação
 - **Formulário de avaliação**: Seleção de curso, disciplina, professor e preenchimento da nota e comentário
@@ -89,7 +89,7 @@ Protótipos de baixa fidelidade foram elaborados para representar as principais 
 
 Os protótipos encontram-se no diretório `/prototipos` deste repositório.
 
-**Ferramentas utilizadas**: Figma, Canva ou desenhos digitais simples.
+**Ferramentas utilizadas**: Figma e Canva
 
 ---
 
