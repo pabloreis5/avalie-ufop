@@ -11,15 +11,15 @@
     <header>
       <div class="header-content">
         <a href="/" class="logo">
-          <div class="logo-icon">📚</div>
+          <div class="logo-icon">🏛️</div>
           <div class="logo-text">
             Avalie<span>UFOP</span>
           </div>
         </a>
         <nav>
-          <a href="/">Home</a>
+          <a href="/">Início</a>
           <a href="/avaliar">Avaliar</a>
-          <a href="/ranking">Ranking</a>
+          <a href="/ranking" class="active">Ranking</a>
         </nav>
       </div>
     </header>
@@ -27,13 +27,13 @@
     <main>
       <div class="page-header">
         <h1>Ranking de Disciplinas</h1>
-        <p>As disciplinas mais bem avaliadas pelos estudantes</p>
+        <p>Disciplinas ordenadas por avaliação dos estudantes</p>
       </div>
 
       {% if ranking and ranking|length > 0 %}
         <div class="ranking-container">
           <div class="ranking-header">
-            <h2>📊 {{ ranking|length }} disciplinas avaliadas</h2>
+            <h2>{{ ranking|length }} disciplinas avaliadas</h2>
             <div class="search-box">
               <input type="text" id="ranking-search" placeholder="Buscar disciplina..." autocomplete="off" />
             </div>
@@ -101,9 +101,9 @@
       {% else %}
         <div class="ranking-container">
           <div class="empty-state">
-            <p>📭 Ainda não há avaliações registradas.</p>
+            <p>Ainda não há avaliações registradas.</p>
             <p style="margin-top: 1rem;">
-              <a href="/avaliar" class="btn btn-primary">Seja o primeiro a avaliar!</a>
+              <a href="/avaliar" class="btn btn-primary">Seja o primeiro a avaliar</a>
             </p>
           </div>
         </div>
@@ -111,7 +111,7 @@
     </main>
 
     <footer>
-      <p>© 2026 Avalie UFOP — Developed By Pablo Reis</p>
+      <p>Avalie UFOP © 2026 — Desenvolvido por Pablo Reis</p>
     </footer>
 
     <script src="/static/app.js"></script>

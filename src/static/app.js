@@ -67,5 +67,25 @@ document.addEventListener("DOMContentLoaded", () => {
     filterByCurso(cursoId);
   });
 
+  // Contador de caracteres para o comentário
+  const comentarioField = document.getElementById("comentario");
+  const charCount = document.getElementById("char-count");
+  
+  if (comentarioField && charCount) {
+    comentarioField.addEventListener("input", () => {
+      const count = comentarioField.value.length;
+      charCount.textContent = count;
+      
+      // Muda a cor quando está próximo do limite
+      if (count > 450) {
+        charCount.style.color = "var(--error)";
+      } else if (count > 400) {
+        charCount.style.color = "var(--accent)";
+      } else {
+        charCount.style.color = "var(--text-muted)";
+      }
+    });
+  }
+
   console.log("app.js ativo: curso -> disciplina, professor e nota.");
 });

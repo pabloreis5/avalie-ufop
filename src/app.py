@@ -1,9 +1,10 @@
 import sqlite3
-from flask import Flask, render_template, request, redirect, url_for
-
+from flask import Flask, render_template, request, redirect, url_for, flash
+import secrets
 
 
 app = Flask(__name__)
+app.secret_key = secrets.token_hex(16)
 DATABASE = "app.db"
 
 DISCIPLINAS_SI = [
@@ -86,8 +87,9 @@ def init_db():
             curso_id INTEGER NOT NULL,
             disciplina_id INTEGER NOT NULL,
             professor_id INTEGER NOT NULL,
-            nota INTEGER NOT NULL,
-            comentario TEXT
+            nota INTEGER NOT NULL CHECK(nota >= 0 AND nota <= 5),
+            comentario TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
 
@@ -153,7 +155,27 @@ def seed_data():
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    conn = get_db()
+    cursor = conn.cursor()
+    
+    # Estatísticas
+    cursor.execute("SELECT COUNT(*) FROM avaliacao")
+    total_avaliacoes = cursor.fetchone()[0]
+    
+    cursor.execute("SELECT COUNT(DISTINCT disciplina_id) FROM avaliacao")
+    disciplinas_avaliadas = cursor.fetchone()[0]
+    
+    cursor.execute("SELECT ROUND(AVG(nota), 2) FROM avaliacao")
+    media_geral = cursor.fetchone()[0] or 0
+    
+    conn.close()
+    
+    return render_template(
+        "index.html",
+        total_avaliacoes=total_avaliacoes,
+        disciplinas_avaliadas=disciplinas_avaliadas,
+        media_geral=media_geral
+    )
 
 @app.route("/avaliar", methods=["GET", "POST"])
 def avaliar():
@@ -172,17 +194,25 @@ def avaliar():
         # Validação obrigatória (não depende do JS)
         if not (curso_id and disciplina_id and professor_id and nota):
             conn.close()
-            # Simples: volta para a página (pode melhorar com flash depois)
+            flash("Por favor, preencha todos os campos obrigatórios.", "error")
             return redirect(url_for("avaliar"))
 
         try:
             nota_int = int(nota)
         except ValueError:
             conn.close()
+            flash("Nota inválida. Selecione uma nota entre 0 e 5.", "error")
             return redirect(url_for("avaliar"))
 
         if nota_int < 0 or nota_int > 5:
             conn.close()
+            flash("Nota inválida. Selecione uma nota entre 0 e 5.", "error")
+            return redirect(url_for("avaliar"))
+        
+        # Validação de tamanho do comentário
+        if comentario and len(comentario) > 500:
+            conn.close()
+            flash("O comentário deve ter no máximo 500 caracteres.", "error")
             return redirect(url_for("avaliar"))
 
         cursor.execute("""
@@ -193,7 +223,8 @@ def avaliar():
 
         conn.commit()
         conn.close()
-
+        
+        flash("Avaliação enviada com sucesso! Obrigado pelo seu feedback.", "success")
         return redirect(url_for("index"))
 
 
