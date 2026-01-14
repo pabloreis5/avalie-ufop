@@ -105,5 +105,43 @@ FLASK. **Flask Documentation**. Disponível em: https://flask.palletsprojects.co
 
 ---
 
-## Estrutura do Repositório
+## 6. Estrutura do Repositório
 
+```
+avalie-ufop/
+│
+├── src/                          # Código-fonte da aplicação
+│   ├── app.py                    # Aplicação Flask principal
+│   ├── app.db                    # Banco de dados SQLite (gerado automaticamente)
+│   │
+│   ├── static/                   # Arquivos estáticos (CSS, JS)
+│   │   ├── style.css            # Estilos da aplicação
+│   │   └── app.js               # JavaScript do frontend
+│   │
+│   ├── templates/               # Templates HTML
+│   │   ├── index.html           # Página inicial
+│   │   ├── avaliar.html         # Formulário de avaliação
+│   │   └── ranking.html         # Ranking de disciplinas
+│   │
+│   └── prototipos/              # Protótipos de interface
+│
+├── venv/                        # Ambiente virtual Python (não versionado)
+│
+├── requirements.txt             # Dependências do projeto
+├── readme.md                    # Documentação da proposta
+├── final-version.md            # Documentação dos resultados finais
+├── 02-final-version-modelo.md  # Modelo para documentação final
+├── MELHORIAS.md                # Documentação das melhorias implementadas
+├── CHANGELOG-VISUAL.md         # Documentação das mudanças visuais
+│
+└── .gitignore                  # Arquivos ignorados pelo Git
+```
+
+### Principais Arquivos
+
+- **`src/app.py`**: Contém toda a lógica do backend, rotas Flask, operações de banco de dados e seed de dados iniciais
+- **`src/static/style.css`**: Estilos modernos e responsivos da aplicação
+- **`src/static/app.js`**: Lógica JavaScript para interatividade (filtros, validações, contador de caracteres)
+- **`src/templates/*.html`**: Templates Jinja2 para renderização das páginas
+- **`requirements.txt`**: Lista todas as dependências Python necessárias (Flask, SQLite, etc.)
+- **`final-version.md`**: Documentação completa do projeto finalizado com instruções de instalação e execução
