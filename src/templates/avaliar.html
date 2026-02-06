@@ -11,7 +11,7 @@
     <header>
       <div class="header-content">
         <a href="/" class="logo">
-          <div class="logo-icon">🏛️</div>
+          <img src="{{ url_for('static', filename='logo-forms.png') }}" alt="Logo" class="logo-img">
           <div class="logo-text">
             Avalie<span>UFOP</span>
           </div>
@@ -42,11 +42,15 @@
       {% endwith %}
 
       <div class="form-container">
+        <div class="info-box">
+          <strong>ℹ️ Importante:</strong> Para evitar spam, você pode enviar no máximo 1 avaliação a cada 5 minutos e até 10 avaliações por dia.
+        </div>
+        
         <form id="avaliar-form" method="POST" action="/avaliar">
           <!-- Curso -->
           <div class="form-group">
             <label for="curso_id">Curso <span class="required">*</span></label>
-            <select id="curso_id" name="curso_id">
+            <select id="curso_id" name="curso_id" required>
               <option value="">Selecione o curso...</option>
               {% for curso in cursos %}
                 <option value="{{ curso.id }}">{{ curso.nome }}</option>
@@ -71,7 +75,7 @@
           <!-- Professor -->
           <div class="form-group">
             <label for="professor_id">Professor(a) <span class="required">*</span></label>
-            <select id="professor" name="professor_id" disabled required>
+            <select id="professor" name="professor_id" required disabled>
               <option value="">Selecione o curso primeiro</option>
               {% for p in professores %}
                 <option value="{{ p.id }}">{{ p.nome }}</option>
@@ -85,15 +89,15 @@
             <label>Nota <span class="required">*</span></label>
             <div class="rating-container">
               <div class="star-rating">
-                <input type="radio" id="star5" name="nota" value="5" />
+                <input type="radio" id="star5" name="nota" value="5" required />
                 <label for="star5" title="5 - Excelente">★</label>
-                <input type="radio" id="star4" name="nota" value="4" />
+                <input type="radio" id="star4" name="nota" value="4" required />
                 <label for="star4" title="4 - Muito Bom">★</label>
-                <input type="radio" id="star3" name="nota" value="3" />
+                <input type="radio" id="star3" name="nota" value="3" required />
                 <label for="star3" title="3 - Bom">★</label>
-                <input type="radio" id="star2" name="nota" value="2" />
+                <input type="radio" id="star2" name="nota" value="2" required />
                 <label for="star2" title="2 - Regular">★</label>
-                <input type="radio" id="star1" name="nota" value="1" />
+                <input type="radio" id="star1" name="nota" value="1" required />
                 <label for="star1" title="1 - Ruim">★</label>
               </div>
               <span id="rating-value" class="rating-value">Selecione uma nota de 0 a 5</span>
@@ -110,7 +114,7 @@
             </div>
           </div>
 
-          <button id="btnEnviar" type="submit" disabled>Enviar avaliação</button>
+          <button id="btnEnviar" type="submit" class="btn-submit" disabled>Enviar Avaliação</button>
         </form>
       </div>
     </main>

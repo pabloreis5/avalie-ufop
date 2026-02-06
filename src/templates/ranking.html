@@ -11,7 +11,7 @@
     <header>
       <div class="header-content">
         <a href="/" class="logo">
-          <div class="logo-icon">🏛️</div>
+          <img src="{{ url_for('static', filename='logo-forms.png') }}" alt="Logo" class="logo-img">
           <div class="logo-text">
             Avalie<span>UFOP</span>
           </div>
@@ -30,14 +30,70 @@
         <p>Disciplinas ordenadas por avaliação dos estudantes</p>
       </div>
 
-      {% if ranking and ranking|length > 0 %}
+      {% if ranking and ranking|length > 0 or curso_filter or nota_min > 0 or aval_min > 1 %}
         <div class="ranking-container">
+          <!-- Filtros -->
+          <div class="filters-section">
+            <h3>Filtros</h3>
+            <form id="filter-form" method="GET" action="/ranking">
+              <div class="filters-grid">
+                <div class="filter-group">
+                  <label for="curso">Curso</label>
+                  <select id="curso" name="curso">
+                    <option value="">Todos os cursos</option>
+                    {% for curso in cursos %}
+                      <option value="{{ curso }}" {% if curso_filter == curso %}selected{% endif %}>
+                        {{ curso }}
+                      </option>
+                    {% endfor %}
+                  </select>
+                </div>
+
+                <div class="filter-group">
+                  <label for="nota_min">Nota Mínima</label>
+                  <select id="nota_min" name="nota_min">
+                    <option value="0" {% if nota_min == 0 %}selected{% endif %}>Todas</option>
+                    <option value="1" {% if nota_min == 1 %}selected{% endif %}>≥ 1.0</option>
+                    <option value="2" {% if nota_min == 2 %}selected{% endif %}>≥ 2.0</option>
+                    <option value="3" {% if nota_min == 3 %}selected{% endif %}>≥ 3.0</option>
+                    <option value="4" {% if nota_min == 4 %}selected{% endif %}>≥ 4.0</option>
+                  </select>
+                </div>
+
+                <div class="filter-group">
+                  <label for="aval_min">Avaliações Mínimas</label>
+                  <select id="aval_min" name="aval_min">
+                    <option value="1" {% if aval_min == 1 %}selected{% endif %}>Todas</option>
+                    <option value="3" {% if aval_min == 3 %}selected{% endif %}>≥ 3</option>
+                    <option value="5" {% if aval_min == 5 %}selected{% endif %}>≥ 5</option>
+                    <option value="10" {% if aval_min == 10 %}selected{% endif %}>≥ 10</option>
+                  </select>
+                </div>
+
+                <div class="filter-actions">
+                  <button type="submit" class="btn-filter">Aplicar</button>
+                  <a href="/ranking" class="btn-clear">Limpar</a>
+                </div>
+              </div>
+            </form>
+          </div>
+
           <div class="ranking-header">
-            <h2>{{ ranking|length }} disciplinas avaliadas</h2>
+            <h2>
+              {% if total_items == 0 %}
+                Nenhum resultado encontrado
+              {% elif total_items == 1 %}
+                1 disciplina encontrada
+              {% else %}
+                {{ total_items }} disciplinas encontradas
+              {% endif %}
+            </h2>
             <div class="search-box">
-              <input type="text" id="ranking-search" placeholder="Buscar disciplina..." autocomplete="off" />
+              <input type="text" id="ranking-search" placeholder="Buscar disciplina ou professor..." autocomplete="off" />
             </div>
           </div>
+
+          {% if ranking and ranking|length > 0 %}
 
           <table id="ranking-table" class="ranking-table">
             <thead>
@@ -52,16 +108,17 @@
             </thead>
             <tbody>
               {% for item in ranking %}
+                {% set position = (page - 1) * per_page + loop.index %}
                 <tr>
                   <td>
-                    <span class="ranking-position {% if loop.index == 1 %}
+                    <span class="ranking-position {% if position == 1 %}
                         top-1
-                      {% elif loop.index == 2 %}
+                      {% elif position == 2 %}
                         top-2
-                      {% elif loop.index == 3 %}
+                      {% elif position == 3 %}
                         top-3
                       {% endif %}">
-                      {{ loop.index }}
+                      {{ position }}
                     </span>
                   </td>
 
@@ -97,6 +154,48 @@
           <div id="no-results" class="no-results">
             <p>Nenhuma disciplina encontrada com esse termo.</p>
           </div>
+
+          <!-- Paginação -->
+          {% if total_pages > 1 %}
+            <div class="pagination">
+              <div class="pagination-info">
+                Página {{ page }} de {{ total_pages }}
+              </div>
+              <div class="pagination-controls">
+                {% if page > 1 %}
+                  <a href="?page=1&curso={{ curso_filter }}&nota_min={{ nota_min }}&aval_min={{ aval_min }}" class="page-link">
+                    « Primeira
+                  </a>
+                  <a href="?page={{ page - 1 }}&curso={{ curso_filter }}&nota_min={{ nota_min }}&aval_min={{ aval_min }}" class="page-link">
+                    ‹ Anterior
+                  </a>
+                {% endif %}
+
+                {% for p in range([1, page - 2]|max, [page + 3, total_pages + 1]|min) %}
+                  <a href="?page={{ p }}&curso={{ curso_filter }}&nota_min={{ nota_min }}&aval_min={{ aval_min }}" class="page-link {% if p == page %}active{% endif %}">
+                    {{ p }}
+                  </a>
+                {% endfor %}
+
+                {% if page < total_pages %}
+                  <a href="?page={{ page + 1 }}&curso={{ curso_filter }}&nota_min={{ nota_min }}&aval_min={{ aval_min }}" class="page-link">
+                    Próxima ›
+                  </a>
+                  <a href="?page={{ total_pages }}&curso={{ curso_filter }}&nota_min={{ nota_min }}&aval_min={{ aval_min }}" class="page-link">
+                    Última »
+                  </a>
+                {% endif %}
+              </div>
+            </div>
+          {% endif %}
+          {% else %}
+            <div class="empty-state">
+              <p>Nenhum resultado encontrado com os filtros selecionados.</p>
+              <p style="margin-top: 1rem;">
+                <a href="/ranking" class="btn btn-secondary">Limpar Filtros</a>
+              </p>
+            </div>
+          {% endif %}
         </div>
       {% else %}
         <div class="ranking-container">

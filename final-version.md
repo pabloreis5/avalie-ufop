@@ -109,13 +109,61 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-#### 5.3 Configuração
+#### 5.3 Configuração e População do Banco de Dados
 
-Não há configurações adicionais necessárias. O banco de dados SQLite (`app.db`) será criado automaticamente na primeira execução, e os dados iniciais (cursos, disciplinas de Sistemas de Informação e professores de exemplo) serão populados automaticamente através do sistema de seed implementado.
+O sistema utiliza uma abordagem profissional com dados separados em arquivos CSV. Para popular o banco de dados com cursos e disciplinas pré-definidos:
+
+**1. Navegue até o diretório `src`:**
+```bash
+cd src
+```
+
+**2. Execute o script de seed do banco de dados:**
+```bash
+python seed_database.py
+```
+
+Este comando irá:
+- ✓ Criar automaticamente o banco de dados SQLite (`app.db`)
+- ✓ Criar todas as tabelas necessárias
+- ✓ Importar os dados de cursos, disciplinas e professores dos arquivos CSV em `src/data/`
+- ✓ Exibir estatísticas dos dados importados
+
+**Exemplo de saída esperada:**
+```
+🌱 Iniciando seed do banco de dados...
+
+✓ Tabelas criadas com sucesso
+✓ 4 cursos inseridos
+✓ 4 professores inseridos
+✓ 90 disciplinas inseridas
+
+==================================================
+ESTATÍSTICAS DO BANCO DE DADOS
+==================================================
+Cursos cadastrados: 4
+Professores cadastrados: 4
+Disciplinas cadastradas: 90
+
+Disciplinas por curso:
+  - Engenharia de Computação: 51
+  - Sistemas de Informação: 39
+  - Engenharia Elétrica: 0
+  - Engenharia de Produção: 0
+==================================================
+
+✅ Seed concluído com sucesso!
+```
+
+**Observações importantes:**
+- Os dados estão organizados em arquivos CSV no diretório `src/data/`
+- O script pode ser executado múltiplas vezes sem duplicar dados
+- Para adicionar novos cursos, edite os arquivos CSV e execute o script novamente
+- Consulte o arquivo `GUIA_SEEDS.md` para instruções detalhadas sobre como adicionar cursos e disciplinas
 
 #### 5.4 Execução
 
-**1. Navegue até o diretório `src`:**
+**1. Certifique-se de estar no diretório `src` e que o banco foi populado:**
 ```bash
 cd src
 ```
@@ -138,9 +186,11 @@ Abra seu navegador e acesse: `http://127.0.0.1:5000` ou `http://localhost:5000`
 #### 5.5 Observações
 
 - O sistema utiliza SQLite em modo de arquivo, portanto o banco de dados persiste entre execuções
-- Para reiniciar o banco de dados, basta deletar o arquivo `app.db` no diretório `src`
+- Para reiniciar o banco de dados, delete o arquivo `app.db` e execute novamente `python seed_database.py`
+- Os dados ficam separados do código em arquivos CSV no diretório `src/data/`, facilitando manutenção e versionamento
 - O modo debug está habilitado por padrão, permitindo hot-reload durante desenvolvimento
 - Para ambiente de produção, recomenda-se desabilitar o modo debug e utilizar um servidor WSGI apropriado (como Gunicorn)
+- Para informações sobre como adicionar novos cursos e disciplinas, consulte `GUIA_SEEDS.md`
 
 ---
 

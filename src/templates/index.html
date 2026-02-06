@@ -12,7 +12,7 @@
   <header>
     <div class="header-content">
       <a href="/" class="logo">
-        <div class="logo-icon">🏛️</div>
+        <img src="{{ url_for('static', filename='logo-forms.png') }}" alt="Logo" class="logo-img">
         <div class="logo-text">Avalie<span>UFOP</span></div>
       </a>
       <nav>
@@ -72,17 +72,17 @@
 
     <section class="features">
       <div class="feature-card">
-        <div class="feature-icon">🔒</div>
+        <div class="feature-icon icon-lock"></div>
         <h3>Totalmente Anônimo</h3>
         <p>Avaliações completamente anônimas. Nenhum dado pessoal é coletado.</p>
       </div>
       <div class="feature-card">
-        <div class="feature-icon">⭐</div>
+        <div class="feature-icon icon-star"></div>
         <h3>Avaliação Simples</h3>
         <p>Sistema intuitivo de notas de 0 a 5 com comentários opcionais.</p>
       </div>
       <div class="feature-card">
-        <div class="feature-icon">📈</div>
+        <div class="feature-icon icon-chart"></div>
         <h3>Ranking Atualizado</h3>
         <p>Visualize as disciplinas mais bem avaliadas em tempo real.</p>
       </div>

@@ -112,7 +112,14 @@ avalie-ufop/
 │
 ├── src/                          # Código-fonte da aplicação
 │   ├── app.py                    # Aplicação Flask principal
+│   ├── seed_database.py          # Script para popular o banco de dados
 │   ├── app.db                    # Banco de dados SQLite (gerado automaticamente)
+│   │
+│   ├── data/                     # Dados para popular o banco (CSV)
+│   │   ├── cursos.csv           # Lista de cursos
+│   │   ├── professores.csv      # Lista de professores
+│   │   ├── disciplinas_*.csv    # Disciplinas por curso
+│   │   └── README.md            # Documentação dos arquivos de dados
 │   │
 │   ├── static/                   # Arquivos estáticos (CSS, JS)
 │   │   ├── style.css            # Estilos da aplicação
@@ -133,15 +140,48 @@ avalie-ufop/
 ├── 02-final-version-modelo.md  # Modelo para documentação final
 ├── MELHORIAS.md                # Documentação das melhorias implementadas
 ├── CHANGELOG-VISUAL.md         # Documentação das mudanças visuais
+├── GUIA_SEEDS.md               # Guia completo do sistema de seeds com CSV
 │
 └── .gitignore                  # Arquivos ignorados pelo Git
 ```
 
 ### Principais Arquivos
 
-- **`src/app.py`**: Contém toda a lógica do backend, rotas Flask, operações de banco de dados e seed de dados iniciais
+- **`src/app.py`**: Contém toda a lógica do backend, rotas Flask e operações de banco de dados
+- **`src/seed_database.py`**: Script profissional para popular o banco a partir de arquivos CSV
+- **`src/data/*.csv`**: Arquivos de dados (cursos, disciplinas, professores) separados do código
 - **`src/static/style.css`**: Estilos modernos e responsivos da aplicação
 - **`src/static/app.js`**: Lógica JavaScript para interatividade (filtros, validações, contador de caracteres)
 - **`src/templates/*.html`**: Templates Jinja2 para renderização das páginas
 - **`requirements.txt`**: Lista todas as dependências Python necessárias (Flask, SQLite, etc.)
 - **`final-version.md`**: Documentação completa do projeto finalizado com instruções de instalação e execução
+- **`GUIA_SEEDS.md`**: Guia completo sobre o sistema de seeds profissional implementado
+
+---
+
+## 7. Sistema de Seeds Profissional
+
+Este projeto utiliza uma abordagem profissional para gerenciar dados do banco de dados:
+
+### ✅ Vantagens da Abordagem com CSV
+
+- **Escalável**: Adicione quantos cursos quiser sem modificar código
+- **Organizado**: Dados separados do código-fonte
+- **Versionável**: Fácil rastrear alterações nos dados via Git  
+- **Colaborativo**: Qualquer pessoa pode editar CSVs (Excel, Google Sheets)
+- **Reutilizável**: Scripts podem ser executados múltiplas vezes
+
+### 📝 Como Popular o Banco
+
+```powershell
+cd src
+python seed_database.py
+```
+
+### 📚 Para Mais Informações
+
+Consulte o [GUIA_SEEDS.md](GUIA_SEEDS.md) para:
+- Como adicionar novos cursos
+- Como adicionar disciplinas
+- Estrutura dos arquivos CSV
+- Próximos passos e melhorias sugeridas

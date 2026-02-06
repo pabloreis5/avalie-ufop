@@ -1,61 +1,98 @@
 import sqlite3
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, session
 import secrets
+from datetime import datetime, timedelta
+import hashlib
 
 
 app = Flask(__name__)
 app.secret_key = secrets.token_hex(16)
 DATABASE = "app.db"
 
-DISCIPLINAS_SI = [
-    ("CEA059", "Fundamentos de Geometria Analítica e Álgebra Linear"),
-    ("CEA060", "Fundamentos de Cálculo"),
-    ("CSI101", "Programação de Computadores I"),
-    ("CSI601", "Fundamentos de Sistema de Informação"),
-    ("CSI901", "Informática e Sociedade"),
-    ("CSI902", "Metodologia de Pesquisa"),
-    ("CSI011", "Matemática Discreta"),
-    ("CSI102", "Programação de Computadores II"),
-    ("CSI103", "Algoritmos e Estruturas de Dados I"),
-    ("CSI807", "Gestão da Informação"),
-    ("ENP144", "Teoria Geral da Administração"),
-    ("CEA055", "Estatística e Probabilidade"),
-    ("CSI104", "Algoritmos e Estruturas de Dados II"),
-    ("CSI115", "Algoritmos e Estruturas de Dados III"),
-    ("CSI211", "Fundamentos de Organização e Arquitetura de Computadores"),
-    ("ENP473", "Comportamento Organizacional"),
-    ("CSI204", "Sistemas Operacionais"),
-    ("CSI412", "Engenharia de Software I"),
-    ("CSI602", "Banco de Dados I"),
-    ("ENP012", "Programação Linear e Inteira"),
-    ("ENP150", "Economia"),
-    ("CSI106", "Fundamentos Teóricos da Computação"),
-    ("CSI301", "Redes de Computadores I"),
-    ("CSI410", "Engenharia de Software II"),
-    ("CSI522", "Interação Humano-Computador"),
-    ("CSI701", "Inteligência Artificial"),
-    ("CSI990", "Projeto Integrador I"),
-    ("CSI114", "Linguagens de Programação"),
-    ("CSI302", "Sistemas Distribuídos"),
-    ("CSI405", "Gerência de Projetos de Software"),
-    ("CSI606", "Sistemas Web I"),
-    ("CSI991", "Projeto Integrador II"),
-    ("CSI808", "Gestão da Tecnologia da Informação"),
-    ("CSI992", "Trabalho de Conclusão de Curso I"),
-    ("ENP026", "Administração de Recursos Humanos"),
-    ("ENP493", "Empreendedorismo"),
-    ("CSI307", "Segurança e Auditoria de Sistemas"),
-    ("CSI605", "Sistemas de Apoio à Decisão"),
-    ("CSI997", "Trabalho de Conclusão de Curso II"),
-]
+# Configurações anti-spam
+RATE_LIMIT_MINUTES = 5  # Tempo mínimo entre avaliações
+MAX_AVALIACOES_POR_DIA = 10  # Máximo de avaliações por dia
 
 
 def get_db():
+    """Retorna uma conexão com o banco de dados"""
     conn = sqlite3.connect(DATABASE)
     conn.row_factory = sqlite3.Row
     return conn
 
+
+def get_user_hash():
+    """Gera um hash único baseado no IP e User-Agent do usuário"""
+    user_ip = request.remote_addr
+    user_agent = request.headers.get('User-Agent', '')
+    unique_string = f"{user_ip}:{user_agent}"
+    return hashlib.sha256(unique_string.encode()).hexdigest()
+
+
+def check_rate_limit():
+    """Verifica se o usuário está dentro do limite de avaliações"""
+    user_hash = get_user_hash()
+    conn = get_db()
+    cursor = conn.cursor()
+    
+    # Buscar último registro do usuário
+    cursor.execute("""
+        SELECT last_action, action_count 
+        FROM rate_limit 
+        WHERE user_hash = ?
+        ORDER BY last_action DESC 
+        LIMIT 1
+    """, (user_hash,))
+    
+    result = cursor.fetchone()
+    
+    if result:
+        last_action = datetime.fromisoformat(result['last_action'])
+        action_count = result['action_count']
+        now = datetime.now()
+        
+        # Verificar se passou tempo suficiente desde última ação
+        time_diff = (now - last_action).total_seconds() / 60
+        
+        if time_diff < RATE_LIMIT_MINUTES:
+            conn.close()
+            return False, f"Aguarde {int(RATE_LIMIT_MINUTES - time_diff)} minuto(s) antes de avaliar novamente."
+        
+        # Verificar limite diário (últimas 24h)
+        cursor.execute("""
+            SELECT COUNT(*) as count
+            FROM rate_limit
+            WHERE user_hash = ?
+            AND last_action >= datetime('now', '-1 day')
+        """, (user_hash,))
+        
+        daily_count = cursor.fetchone()['count']
+        
+        if daily_count >= MAX_AVALIACOES_POR_DIA:
+            conn.close()
+            return False, f"Limite diário de {MAX_AVALIACOES_POR_DIA} avaliações atingido. Tente novamente amanhã."
+    
+    conn.close()
+    return True, None
+
+
+def register_rate_limit():
+    """Registra uma ação do usuário para controle de rate limit"""
+    user_hash = get_user_hash()
+    conn = get_db()
+    cursor = conn.cursor()
+    
+    cursor.execute("""
+        INSERT INTO rate_limit (user_hash, last_action, action_count)
+        VALUES (?, datetime('now'), 1)
+    """, (user_hash,))
+    
+    conn.commit()
+    conn.close()
+
+
 def init_db():
+    """Cria as tabelas do banco de dados se não existirem"""
     conn = get_db()
     cursor = conn.cursor()
 
@@ -89,65 +126,30 @@ def init_db():
             professor_id INTEGER NOT NULL,
             nota INTEGER NOT NULL CHECK(nota >= 0 AND nota <= 5),
             comentario TEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            user_hash TEXT
         )
     """)
 
-    conn.commit()
-    conn.close()
-
-def seed_data():
-    conn = get_db()
-    cursor = conn.cursor()
-
-    cursos = [
-        "Engenharia Elétrica",
-        "Engenharia de Computação",
-        "Engenharia de Produção",
-        "Sistemas de Informação"
-    ]
-
-    for curso in cursos:
-        cursor.execute(
-            "INSERT OR IGNORE INTO curso (nome) VALUES (?)",
-            (curso,)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS rate_limit (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_hash TEXT NOT NULL,
+            last_action TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            action_count INTEGER DEFAULT 1
         )
+    """)
 
-    professores = [
-        "Professor A",
-        "Professor B",
-        "Professor C",
-        "Professor D"
-    ]
+    # Criar índices para melhor performance
+    cursor.execute("""
+        CREATE INDEX IF NOT EXISTS idx_rate_limit_hash 
+        ON rate_limit(user_hash)
+    """)
 
-    for prof in professores:
-        cursor.execute(
-            "INSERT OR IGNORE INTO professor (nome) VALUES (?)",
-            (prof,)
-        )
-
-    # Pega o id do curso "Sistemas de Informação" sem assumir número fixo
-    cursor.execute("SELECT id FROM curso WHERE nome = ?", ("Sistemas de Informação",))
-    row = cursor.fetchone()
-    if not row:
-        raise RuntimeError("Curso 'Sistemas de Informação' não encontrado no seed.")
-    si_id = row["id"]
-
-    # Insere todas as disciplinas de SI (sem duplicar)
-    for codigo, nome in DISCIPLINAS_SI:
-        nome_completo = f"{codigo} - {nome}"
-
-        cursor.execute(
-            "SELECT 1 FROM disciplina WHERE nome = ? AND curso_id = ?",
-            (nome_completo, si_id)
-        )
-        exists = cursor.fetchone()
-
-        if not exists:
-            cursor.execute(
-                "INSERT INTO disciplina (nome, curso_id) VALUES (?, ?)",
-                (nome_completo, si_id)
-            )
+    cursor.execute("""
+        CREATE INDEX IF NOT EXISTS idx_avaliacao_disciplina 
+        ON avaliacao(disciplina_id)
+    """)
 
     conn.commit()
     conn.close()
@@ -183,6 +185,13 @@ def avaliar():
     cursor = conn.cursor()
 
     if request.method == "POST":
+        # Verificar rate limit
+        allowed, message = check_rate_limit()
+        if not allowed:
+            conn.close()
+            flash(message, "error")
+            return redirect(url_for("avaliar"))
+
         print("DEBUG form:", dict(request.form))
 
         curso_id = request.form.get("curso_id", "").strip()
@@ -215,14 +224,19 @@ def avaliar():
             flash("O comentário deve ter no máximo 500 caracteres.", "error")
             return redirect(url_for("avaliar"))
 
+        user_hash = get_user_hash()
+
         cursor.execute("""
             INSERT INTO avaliacao
-            (curso_id, disciplina_id, professor_id, nota, comentario)
-            VALUES (?, ?, ?, ?, ?)
-        """, (curso_id, disciplina_id, professor_id, nota_int, comentario or None))
+            (curso_id, disciplina_id, professor_id, nota, comentario, user_hash)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (curso_id, disciplina_id, professor_id, nota_int, comentario or None, user_hash))
 
         conn.commit()
         conn.close()
+        
+        # Registrar no rate limit
+        register_rate_limit()
         
         flash("Avaliação enviada com sucesso! Obrigado pelo seu feedback.", "success")
         return redirect(url_for("index"))
@@ -251,9 +265,19 @@ def ranking():
     conn = get_db()
     cursor = conn.cursor()
 
-    cursor.execute("""
+    # Obter parâmetros de filtro e paginação
+    curso_filter = request.args.get("curso", "")
+    nota_min = request.args.get("nota_min", type=float, default=0)
+    aval_min = request.args.get("aval_min", type=int, default=1)
+    page = request.args.get("page", type=int, default=1)
+    per_page = 20
+
+    # Construir query com filtros
+    query = """
         SELECT
+            d.id as disciplina_id,
             d.nome AS disciplina,
+            c.nome AS curso_completo,
             CASE c.nome
                 WHEN 'Sistemas de Informação' THEN 'SI'
                 WHEN 'Engenharia Elétrica' THEN 'E.E'
@@ -268,29 +292,95 @@ def ranking():
         JOIN disciplina d ON d.id = a.disciplina_id
         JOIN curso c ON c.id = d.curso_id
         JOIN professor p ON p.id = a.professor_id
+        WHERE 1=1
+    """
+    
+    params = []
+    
+    # Aplicar filtro de curso
+    if curso_filter:
+        query += " AND c.nome = ?"
+        params.append(curso_filter)
+    
+    query += """
         GROUP BY d.id, p.id
+        HAVING AVG(a.nota) >= ? AND COUNT(a.id) >= ?
         ORDER BY media DESC, total_avaliacoes DESC
-    """)
-
+    """
+    
+    params.extend([nota_min, aval_min])
+    
+    # Executar query para contar total
+    count_query = f"""
+        SELECT COUNT(*) as total FROM (
+            {query}
+        )
+    """
+    cursor.execute(count_query, params)
+    total_items = cursor.fetchone()['total']
+    
+    # Calcular paginação
+    total_pages = (total_items + per_page - 1) // per_page
+    offset = (page - 1) * per_page
+    
+    # Adicionar LIMIT e OFFSET
+    query += " LIMIT ? OFFSET ?"
+    params.extend([per_page, offset])
+    
+    cursor.execute(query, params)
     ranking = cursor.fetchall()
+    
+    # Buscar lista de cursos para o filtro
+    cursor.execute("SELECT DISTINCT nome FROM curso ORDER BY nome")
+    cursos = [row['nome'] for row in cursor.fetchall()]
+    
     conn.close()
 
-    return render_template("ranking.html", ranking=ranking)
+    return render_template(
+        "ranking.html",
+        ranking=ranking,
+        cursos=cursos,
+        curso_filter=curso_filter,
+        nota_min=nota_min,
+        aval_min=aval_min,
+        page=page,
+        total_pages=total_pages,
+        total_items=total_items,
+        per_page=per_page
+    )
+
+
+@app.route("/api/ranking/suggestions")
+def ranking_suggestions():
+    """API endpoint que retorna sugestões de busca"""
+    query = request.args.get("q", "").strip().lower()
+    
+    if not query or len(query) < 2:
+        return {"suggestions": []}
+    
+    conn = get_db()
+    cursor = conn.cursor()
+    
+    # Busca disciplinas e professores que correspondem ao termo
+    cursor.execute("""
+        SELECT DISTINCT d.nome AS text, 'disciplina' AS type
+        FROM disciplina d
+        WHERE LOWER(d.nome) LIKE ?
+        UNION
+        SELECT DISTINCT p.nome AS text, 'professor' AS type
+        FROM professor p
+        WHERE LOWER(p.nome) LIKE ?
+        LIMIT 10
+    """, (f"%{query}%", f"%{query}%"))
+    
+    suggestions = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    
+    return {"suggestions": suggestions}
 
 
 if __name__ == "__main__":
     init_db()
-
-    # Só roda seed se estiver vazio
-    conn = get_db()
-    cur = conn.cursor()
-    cur.execute("SELECT COUNT(*) FROM curso")
-    empty = (cur.fetchone()[0] == 0)
-    conn.close()
-
-    if empty:
-        seed_data()
-
     app.run(debug=True)
 
 
